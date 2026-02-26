@@ -1,0 +1,6 @@
+root = true
+
+[*]
+
+indent_style = space
+ident_sixze = 2 
