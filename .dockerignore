@@ -1,0 +1,49 @@
+# =============================================================================
+# .dockerignore
+#
+# Funciona igual ao .gitignore, mas para o Docker.
+# Arquivos listados aqui NÃO são copiados para dentro das imagens.
+#
+# Por que isso importa?
+# Sem .dockerignore, o node_modules local (que pode ter centenas de MB)
+# seria copiado para dentro da imagem, tornando o build lento e a imagem gigante.
+# O Docker instala as dependências DENTRO da imagem — não precisamos das locais.
+# =============================================================================
+
+# Dependências locais (serão reinstaladas dentro da imagem)
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Build outputs (serão regenerados)
+.next/
+dist/
+build/
+out/
+
+# Cache do Turborepo
+.turbo/
+
+# Arquivos de ambiente (NUNCA copiar — usamos variáveis de ambiente do docker-compose)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# IDE e OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentação e testes (não precisam ir para produção)
+*.md
+coverage/
+playwright-report/
+storybook-static/
+
+# Logs
+*.log

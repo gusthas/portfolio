@@ -1,0 +1,161 @@
+// =============================================================================
+// PRISMA SCHEMA — Modelo do Banco de Dados
+//
+// O Prisma lê esse arquivo e gera:
+//   1. As tabelas no PostgreSQL (via migrations)
+//   2. O tipo TypeScript de cada modelo (você nunca escreve interfaces manuais)
+//
+// Analogia: esse arquivo é a "planta do HD". Cada model = uma tabela.
+// Cada campo = uma coluna. O Prisma garante que o TypeScript sabe o formato
+// exato de cada dado que vem do banco.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// SKILL — Habilidades técnicas com métricas reais
+// ---------------------------------------------------------------------------
+model Skill {
+  id          String      @id @default(cuid())
+  name        String      @unique  // "TypeScript", "React", "Docker"...
+  category    SkillCategory
+  level       SkillLevel
+  score       Int          // 0-100 calculado por commits, projetos, etc.
+  commits     Int          @default(0)
+  projects    Int          @default(0)
+  yearsUsing  Float        @default(0)
+  description String?
+  iconUrl     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("skills")
+}
+
+enum SkillCategory {
+  FRONTEND
+  BACKEND
+  DEVOPS
+  TESTING
+  DATABASE
+  TOOLS
+}
+
+enum SkillLevel {
+  BEGINNER       // 0-25
+  INTERMEDIATE   // 26-50
+  ADVANCED       // 51-75
+  MASTER         // 76-100
+}
+
+// ---------------------------------------------------------------------------
+// METRIC — Snapshots temporais (histórico de evolução)
+// Cada registro é uma "foto" do estado das métricas em um momento no tempo.
+// Isso permite gráficos de evolução temporal.
+// ---------------------------------------------------------------------------
+model Metric {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  totalCommits Int
+  totalRepos   Int
+  totalStars   Int
+  topLanguages Json     // { "TypeScript": 60, "Python": 20, ... }
+  skillScores  Json     // { "skillId": score, ... }
+  createdAt    DateTime @default(now())
+
+  @@map("metrics")
+}
+
+// ---------------------------------------------------------------------------
+// HOBBY — Jogos e livros com dados das APIs externas
+// ---------------------------------------------------------------------------
+model Hobby {
+  id              String    @id @default(cuid())
+  type            HobbyType // GAME ou BOOK
+  title           String
+  coverUrl        String?
+  description     String?
+  personalImpact  String?   // "Como isso me influencia como dev"
+  lessonsLearned  String?   // "O que aprendi"
+  thinkingStyle   String?   // "Como isso moldou meu raciocínio"
+  rating          Int?      // 1-5
+  completed       Boolean   @default(false)
+  completedAt     DateTime?
+  externalId      String?   // ID na API externa (RAWG ou Google Books)
+  metadata        Json?     // Dados extras da API (genre, author, platform...)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("hobbies")
+}
+
+enum HobbyType {
+  GAME
+  BOOK
+}
+
+// ---------------------------------------------------------------------------
+// INSIGHT — Análises automáticas geradas pelo sistema
+// ---------------------------------------------------------------------------
+model Insight {
+  id          String      @id @default(cuid())
+  type        InsightType
+  title       String
+  description String
+  value       String?     // Valor associado ("Manhã", "Backend", "85%"...)
+  icon        String?     // Nome do ícone Lucide
+  isActive    Boolean     @default(true)
+  generatedAt DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("insights")
+}
+
+enum InsightType {
+  PRODUCTIVITY   // Melhor horário
+  STRENGTH       // Área mais forte
+  IMPROVEMENT    // Área de melhoria
+  TREND          // Tendência de evolução
+  PATTERN        // Padrão de comportamento
+}
+
+// ---------------------------------------------------------------------------
+// USER — Administrador do portfólio (área privada)
+// ---------------------------------------------------------------------------
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+}
+
+// ---------------------------------------------------------------------------
+// WEBHOOK_LOG — Registro de webhooks recebidos (para debug e auditoria)
+// ---------------------------------------------------------------------------
+model WebhookLog {
+  id        String   @id @default(cuid())
+  source    String   // "github", "custom"
+  event     String   // "push", "star", "ping"
+  payload   Json
+  processed Boolean  @default(false)
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@map("webhook_logs")
+}
